@@ -1,6 +1,25 @@
                                                      -*- coding: utf-8 -*-
 Changes with APR-util 1.7.0
 
+  *) apr_uri: Update apr_uri_parse() and apr_uri_unparse() to decode / encode
+     a % separating a zone identifier in an IPv6 literal if detected following
+     RFC6874. PR69754. [Jens Finkhaeuser <jens@finkhaeuser.de>, Ruediger Pluem]
+
+  *) apr_ldap: Add support for z/OS. [Eric Covener]
+
+  *) apr_ldap: Fix the switching on and off of LDAP_OPT_SSL in the
+     Microsoft LDAP SDK. [Ivan Zhakov]
+
+  *) apr_crypto_openssl: Add provider support on OpenSSL3+.
+     [Graham Leggett]
+
+  *) apr_dbm_lmdb: Add LMDB driver for apr_dbm.
+     [Lubos Uhliarik <uhliarik redhat.com>]
+
+  *) apr_ldap: Add write capability to the LDAP API. Support for
+     add, modify, rename, delete, and extended operations.
+     [Graham Leggett]
+
   *) apr_ldap: Explicitly detect the case where OpenLDAP has been
      installed with SASL support, but the SASL headers are missing.
      [Graham Leggett]

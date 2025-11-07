@@ -38,7 +38,7 @@ The following tools must be in PATH:
 
 The following support libraries are mandatory:
 
-* APR 1.7.5 or later, built with cmake
+* APR 1.7.6 or later, built with cmake
 
 Optional support libraries allow optional features of APR to be enabled:
 
@@ -123,7 +123,6 @@ Known Bugs and Limitations
     . APU_HAVE_ORACLE
   + CRYPTO:
     . APU_HAVE_NSS
-  + XLATE, APU_HAVE_ICONV (no way to consume an apr-iconv build yet)
 * Static builds of APR modules are not supported.
 * CHANGES/LICENSE/NOTICE is not installed, unlike Makefile.win.
   (But unlike Makefile.win we want to call them APR-Util-CHANGES.txt

@@ -328,9 +328,10 @@ APU_DECLARE(apr_status_t) apr_brigade_split_line(apr_bucket_brigade *bbOut,
             pos = memchr(str, APR_ASCII_LF, len);
             /* We found a match. */
             if (pos != NULL) {
+                apr_size_t linelen = pos - str + 1;
                 /* Split if the LF is not the last character in the bucket. */
-                if ((pos - str + 1) < len) {
-                    apr_bucket_split(e, pos - str + 1);
+                if (linelen < len) {
+                    apr_bucket_split(e, linelen);
                 }
                 APR_BUCKET_REMOVE(e);
                 APR_BRIGADE_INSERT_TAIL(bbOut, e);
@@ -398,7 +399,7 @@ APU_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
                                                      apr_off_t maxbytes)
 {
     apr_off_t outbytes = 0;
-    apr_off_t ignore = 0;
+    apr_size_t ignore = 0;
 
     if (!boundary || !boundary[0]) {
         return APR_EINVAL;
@@ -421,7 +422,7 @@ APU_DECLARE(apr_status_t) apr_brigade_split_boundary(apr_bucket_brigade *bbOut,
         const char *pos;
         const char *str;
         apr_bucket *e, *next, *prev;
-        apr_off_t inbytes = 0;
+        apr_size_t inbytes = 0;
         apr_size_t len;
         apr_status_t rv;
 

@@ -70,6 +70,8 @@ ENDIF()
 
 IF(APU_HAVE_CRYPTO)
   FIND_PACKAGE(OpenSSL REQUIRED)
+  SET(APU_HAVE_OPENSSL ON)
+  SET(APU_HAVE_CRYPTO_PRNG ON)
 ENDIF()
 
 IF(APU_HAVE_ICONV)
@@ -78,7 +80,7 @@ ENDIF()
 
 IF(APU_HAVE_SQLITE3)
   FIND_PACKAGE(SQLite3 REQUIRED)
-ENDIF()
+endif()
 
 IF(APU_HAVE_PGSQL)
   FIND_PACKAGE(PostgreSQL REQUIRED)
@@ -273,6 +275,7 @@ SET(APR_TEST_SUITES
 )
 
 SET(install_targets)
+SET(install_modules)
 SET(install_bin_pdb)
 SET(dbd_drivers)
 
@@ -284,8 +287,8 @@ ENDIF()
 
 MACRO(ADD_APU_MODULE name dllname sources libraries)
   IF(APU_DSO_BUILD)
-    ADD_LIBRARY(${name} SHARED ${sources})
-    LIST(APPEND install_targets ${name})
+    ADD_LIBRARY(${name} MODULE ${sources})
+    LIST(APPEND install_modules ${name})
     LIST(APPEND install_bin_pdb $<TARGET_PDB_FILE:${name}>)
 
     TARGET_SOURCES(${name} PRIVATE libaprutil.rc)
@@ -410,7 +413,7 @@ IF(APU_BUILD_TEST)
   ENDFOREACH()
 
   ADD_EXECUTABLE(testall ${APR_TEST_SOURCES})
-  TARGET_LINK_LIBRARIES(testall ${whichapr})
+  TARGET_LINK_LIBRARIES(testall ${whichapr} ${LDAP_LIBRARIES})
   TARGET_COMPILE_DEFINITIONS(testall PRIVATE "BINPATH=$<TARGET_FILE_DIR:testall>")
 
   FOREACH(test ${APR_TEST_SUITES})
@@ -438,6 +441,10 @@ INSTALL(TARGETS ${install_targets}
         LIBRARY DESTINATION ${APU_INSTALL_LIB_DIR}
         ARCHIVE DESTINATION ${APU_INSTALL_LIB_DIR}
        )
+
+# For DSO modules, install only binaries
+INSTALL(TARGETS ${install_modules}
+        DESTINATION ${APU_INSTALL_BIN_DIR})
 
 IF(INSTALL_PDB)
   INSTALL(FILES ${install_bin_pdb}
@@ -470,3 +477,4 @@ MESSAGE(STATUS "  APR_HAS_LDAP .................... : ${APR_HAS_LDAP}")
 MESSAGE(STATUS "  Use Expat ....................... : ${APU_USE_EXPAT}")
 MESSAGE(STATUS "  Use LibXml2 ..................... : ${APU_USE_LIBXML2}")
 MESSAGE(STATUS "  Build test suite ................ : ${APU_BUILD_TEST}")
+

@@ -110,6 +110,7 @@
 #define APU_HAVE_SDBM           1
 
 #ifndef APU_DSO_MODULE_BUILD
+#define APU_HAVE_LMDB           0
 #define APU_HAVE_GDBM           0
 #define APU_HAVE_NDBM           0
 #define APU_HAVE_DB             0
@@ -133,9 +134,10 @@
 #cmakedefine01 APU_HAVE_SQLITE3
 #cmakedefine01 APU_HAVE_PGSQ
 #cmakedefine01 APU_HAVE_CRYPTO
+#cmakedefine01 APU_HAVE_OPENSSL
+#cmakedefine01 APU_HAVE_CRYPTO_PRNG
 
 #ifndef APU_DSO_MODULE_BUILD
-#define APU_HAVE_OPENSSL        0
 #define APU_HAVE_NSS            0
 #endif
 

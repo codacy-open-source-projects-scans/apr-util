@@ -153,6 +153,9 @@ static void test_dbm_traversal(abts_case *tc, apr_dbm_t *db, dbm_table_t *table)
 
         rv = apr_dbm_nextkey(db, &key);
         ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+        /** avoid infinite loop */
+        if (rv != APR_SUCCESS) break;
     } while (1);
 
     for (i = 0; i < NUM_TABLE_ROWS; i++) {
@@ -170,12 +173,23 @@ static void test_dbm(abts_case *tc, void *data)
     dbm_table_t *table;
     const char *type = data;
     const char *file = apr_pstrcat(p, "data/test-", type, NULL);
+    const char *nofile = apr_pstrcat(p, "data/no-such-test-", type, NULL);
 
     rv = apr_dbm_open_ex(&db, type, file, APR_DBM_RWCREATE, APR_OS_DEFAULT, p);
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    if (rv != APR_SUCCESS)
+    if (APR_STATUS_IS_EDSOOPEN(rv)) {
+        ABTS_SKIP(tc, data, "DBM DSO '%s' could not be opened.");
         return;
+    }
+
+    APR_ASSERT_SUCCESS(tc, "open database r/w", rv);
+
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_dbm_open_ex() failed: %s: %s\n", file,
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
+        return;
+    }
 
     table = generate_table();
 
@@ -190,20 +204,30 @@ static void test_dbm(abts_case *tc, void *data)
     rv = apr_dbm_open_ex(&db, type, file, APR_DBM_READONLY, APR_OS_DEFAULT, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    if (rv != APR_SUCCESS)
+    if (APR_SUCCESS != rv) {
+        char errbuf[128];
+        abts_log_message("apr_dbm_open_ex() failed: %s: %s\n", file,
+                         apr_strerror(rv, errbuf, sizeof(errbuf)));
         return;
+    }
 
     test_dbm_exists(tc, db, table);
     test_dbm_traversal(tc, db, table);
     test_dbm_fetch(tc, db, table);
 
     apr_dbm_close(db);
+
+    rv = apr_dbm_open_ex(&db, type, nofile, APR_DBM_READONLY, APR_FPROT_OS_DEFAULT, p);
+    ABTS_TRUE(tc, rv != APR_SUCCESS);
 }
 
 abts_suite *testdbm(abts_suite *suite)
 {
     suite = ADD_SUITE(suite);
 
+#if APU_HAVE_LMDB
+    abts_run_test(suite, test_dbm, "lmdb");
+#endif
 #if APU_HAVE_GDBM
     abts_run_test(suite, test_dbm, "gdbm");
 #endif
